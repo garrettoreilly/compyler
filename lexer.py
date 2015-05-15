@@ -3,7 +3,7 @@ import sys, string
 def lex_program(program):
     token_list = []
     line = 1
-    position = 0
+    position = 1
     char_list = False
     cl_start = 0
     i = 0
@@ -47,6 +47,9 @@ def lex_program(program):
             if program[i+1:] != [] and program[i+1:] != "\n":
                 print("Warning! EOF out of nowhere!");
             return token_list
+        else:
+            sys.exit("Error! Invalid token at line %d, position %d: %c" % (line, position,
+                program[i]))
         position+=1
         i+=1
 
