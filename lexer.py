@@ -41,7 +41,7 @@ def lex_program(program):
             pass
         elif program[i] == "\n":
             line+=1
-            position = 1
+            position = 0
         elif program[i] == "$":
             token_list.append({"type": "EOF", "value": "$", "line": line, "position": position})
             if program[i+1:] != [] and program[i+1:] != "\n":
