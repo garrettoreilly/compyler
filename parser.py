@@ -130,7 +130,7 @@ def parse_bool_expr(token_list):
         result = get_terminal(result, "CloseParen")
         return result
     else:
-        result = get_terminal(result[1:], "Boolean")
+        result = get_terminal(result[1:], "BoolVal")
         return result
 
 def get_terminal(token_list, terminal_type):

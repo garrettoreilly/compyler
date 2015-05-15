@@ -89,9 +89,9 @@ def check_keyword(program):
     elif program[:5] == "print":
         return {"type": "Print", "value": "print"}
     elif program[:5] == "false":
-        return {"type": "Boolean", "value": "false"}
+        return {"type": "BoolVal", "value": "false"}
     elif program[:4] == "true":
-        return {"type": "Boolean", "value": "true"}
+        return {"type": "BoolVal", "value": "true"}
     elif program[:3] == "int":
         return {"type": "IdType", "value": "int"}
     elif program[:2] == "if":
