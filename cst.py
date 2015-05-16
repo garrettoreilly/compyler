@@ -11,7 +11,7 @@ def print_cst(cst, tabs):
         if i.children is []:
             print("%s%s" % (child_indent, i.token["type"]))
         else:
-            print_cst(i, tabs + 1)
+            print_cst(i, tabs+1)
 
 def generate_cst(token_list):
     cst = CST({"type": "Program"})
@@ -29,33 +29,51 @@ def parse_block(token_list):
     return (cst, rest)
 
 def parse_statement_list(token_list):
-    print(token_list)
+    # Assignment statement not consuming tokens correctly. Line 9 of test file.
     cst = CST({"type": "Statement List"})
     if token_list[0]["type"] is "CloseBrace":
         return (None, token_list)
-    (result, rest) = parse_statement(token_list)
+    (result, token_list) = parse_statement(token_list)
+    # print(return_types(token_list))
     cst.children += [result]
-    (result, rest) = parse_statement_list(rest)
+    (result, token_list) = parse_statement_list(token_list)
     if result is not None:
         cst.children += [result]
-    return (cst, rest)
+    return (cst, token_list)
 
 def parse_statement(token_list):
     cst = CST({"type": "Statement"})
     result = None
+    rest = None
     if token_list[0]["type"] is "Print":
+        # print("PRINT CHOSEN")
         (result, rest) = parse_print_statement(token_list)
+        # print(rest[0]["type"])
     elif token_list[0]["type"] is "Id":
+        # print("ID CHOSEN")
         (result, rest) = parse_assign_statement(token_list)
+        # print(rest[0]["type"])
     elif token_list[0]["type"] is "IdType":
+        # print("IDTYPE CHOSEN")
         (result, rest) = parse_var_decl(token_list)
+        # print(rest[0]["type"])
     elif token_list[0]["type"] is "While":
+        # print("WHILE CHOSEN")
         (result, rest) = parse_while_statement(token_list)
+        # print(rest[0]["type"])
     elif token_list[0]["type"] is "If":
+        # print("IF CHOSEN")
         (result, rest) = parse_if_statement(token_list)
+        # print(rest[0]["type"])
     elif token_list[0]["type"] is "OpenBrace":
+        # print("OPENBRACE CHOSEN")
         (result, rest) = parse_block(token_list)
+        # print(rest[0]["type"])
+    else:
+        print("FAIL")
+        # print("Token List: ", token_list[:3])
     cst.children += [result]
+    # print(rest[0]["type"])
     return (cst, rest)
 
 def parse_print_statement(token_list):
@@ -68,9 +86,11 @@ def parse_print_statement(token_list):
 def parse_assign_statement(token_list):
     cst = CST({"type": "Assignment Statement"})
     cst.children += [CST(token_list.pop(0)), CST(token_list.pop(0))]
-    (result, rest) = parse_expr(token_list)
+    (result, token_list) = parse_expr(token_list)
+    # print("PARSE EXPR: ", token_list[0]["type"])
+    # print(rest[0]["type"])
     cst.children += [result]
-    return (cst, rest)
+    return (cst, token_list)
 
 def parse_var_decl(token_list):
     cst = CST({"type": "Variable Declaration"})
@@ -96,27 +116,35 @@ def parse_if_statement(token_list):
     return (cst, rest)
 
 def parse_expr(token_list):
+    # REPLACED REST WITH TOKEN_LIST
+    # I DON'T EVEN KNOW
     cst = CST({"type": "Expression"})
+    result = None
     if token_list[0]["type"] is "Digit":
-        (result, rest) = parse_int_expr(token_list)
+        (result, token_list) = parse_int_expr(token_list)
+        # print(token_list[0]["type"])
     elif token_list[0]["type"] is "CharList":
-        (result, rest) = parse_string_expr(token_list)
-    elif token_list[0]["type"] is "OpenParen":
-        (result, rest) = parse_bool_expr(token_list)
+        (result, token_list) = parse_string_expr(token_list)
+        # print(token_list[0]["type"])
+    elif token_list[0]["type"] in ["OpenParen", "BoolVal"]:
+        (result, token_list) = parse_bool_expr(token_list)
+        # print(token_list[0]["type"])
     elif token_list[0]["type"] is "Id":
-        (result, rest) = (token_list.pop(0), token_list)
+        (result, token_list) = (token_list.pop(0), token_list)
+        # print(token_list[0]["type"])
     cst.children += [result]
-    return (cst, rest)
+    # print(token_list[0]["type"])
+    return (cst, token_list)
 
 def parse_int_expr(token_list):
     cst = CST({"type": "Int Expression"})
     cst.children += [CST(token_list.pop(0))]
-    rest = None
     if token_list[0]["type"] is "IntOp":
         cst.children += [CST(token_list.pop(0))]
         (result, rest) = parse_expr(token_list)
         cst.children += [result]
-    return (cst, rest)
+        return (cst, rest)
+    return (cst, token_list)
 
 def parse_string_expr(token_list):
     cst = CST({"type": "String Expression"})
@@ -136,3 +164,9 @@ def parse_bool_expr(token_list):
     else:
         cst.children += [CST(rest.pop(0))]
         return (cst, rest)
+
+def return_types(token_list):
+    type_list = []
+    for i in token_list:
+        type_list += [i["type"]]
+    return type_list
