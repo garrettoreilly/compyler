@@ -7,7 +7,7 @@ def main():
     token_list = lexer.lex_program(program)
     parser.parse_program(token_list)
     tree = cst.generate_cst(token_list)
-    cst.print_cst(tree, 0)
+    cst.print_cst(tree, 1)
     print("Compilation successful!")
 
 if __name__ == '__main__':
