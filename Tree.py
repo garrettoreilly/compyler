@@ -1,9 +1,9 @@
-class CST:
+class Tree:
     def __init__(self, token):
         self.token = token
         self.children = []
 
-    def print_cst(self, tabs):
+    def print_tree(self, tabs):
         parent_indent = "  " * (tabs - 1)
         child_indent = "  " * tabs
         try:
@@ -12,23 +12,31 @@ class CST:
             print("%s%s" % (parent_indent, self.token["type"]))
         for i in self.children:
             if i.children is not []:
-                i.print_cst(tabs+1)
+                i.print_tree(tabs+1)
 
+    def generate_ast(self, cst):
+        for i in cst.children:
+            if i.token["type"] in ["Print Statement", "Assignment Statement", "Variable Declaration", "If Statement", 
+                    "While Statement", "Block", "IdType", "Id", "Digit", "CharList", "BoolOp", "BoolVal"]:
+                self.children += [Tree(i.token)]
+                self.children[-1].generate_ast(i)
+            else:
+                self.generate_ast(i)
+                
     def generate_cst(self, token_list):
         token_list = self.parse_block(token_list)
-        self.children += [CST(token_list.pop(0))]
-        self.print_cst(1)
+        self.children += [Tree(token_list.pop(0))]
 
     def parse_block(self, token_list):
-        node = CST({"type": "Block"})
-        node.children += [CST(token_list.pop(0))]
+        node = Tree({"type": "Block"})
+        node.children += [Tree(token_list.pop(0))]
         token_list = node.parse_statement_list(token_list)
-        node.children += [CST(token_list.pop(0))]
+        node.children += [Tree(token_list.pop(0))]
         self.children += [node]
         return token_list
 
     def parse_statement_list(self, token_list):
-        node = CST({"type": "Statement List"})
+        node = Tree({"type": "Statement List"})
         if token_list[0]["type"] is "CloseBrace":
             return token_list
         token_list = node.parse_statement(token_list)
@@ -37,7 +45,7 @@ class CST:
         return token_list
 
     def parse_statement(self, token_list):
-        node = CST({"type": "Statement"})
+        node = Tree({"type": "Statement"})
         if token_list[0]["type"] is "Print":
             token_list = node.parse_print_statement(token_list)
         elif token_list[0]["type"] is "Id":
@@ -54,44 +62,44 @@ class CST:
         return token_list
 
     def parse_print_statement(self, token_list):
-        node = CST({"type": "Print Statement"})
-        node.children += [CST(token_list.pop(0)), CST(token_list.pop(0))]
+        node = Tree({"type": "Print Statement"})
+        node.children += [Tree(token_list.pop(0)), Tree(token_list.pop(0))]
         token_list = node.parse_expr(token_list)
-        node.children += [CST(token_list.pop(0))]
+        node.children += [Tree(token_list.pop(0))]
         self.children += [node]
         return token_list
 
     def parse_assign_statement(self, token_list):
-        node = CST({"type": "Assignment Statement"})
-        node.children += [CST(token_list.pop(0)), CST(token_list.pop(0))]
+        node = Tree({"type": "Assignment Statement"})
+        node.children += [Tree(token_list.pop(0)), Tree(token_list.pop(0))]
         token_list = node.parse_expr(token_list)
         self.children += [node]
         return token_list
 
     def parse_var_decl(self, token_list):
-        node = CST({"type": "Variable Declaration"})
-        node.children += [CST(token_list.pop(0)), CST(token_list.pop(0))]
+        node = Tree({"type": "Variable Declaration"})
+        node.children += [Tree(token_list.pop(0)), Tree(token_list.pop(0))]
         self.children += [node]
         return token_list
 
     def parse_while_statement(self, token_list):
-        node = CST({"type": "While Statement"})
-        node.children += [CST(token_list.pop(0))]
+        node = Tree({"type": "While Statement"})
+        node.children += [Tree(token_list.pop(0))]
         token_list = node.parse_bool_expr(token_list)
         token_list = node.parse_block(token_list)
         self.children += [node]
         return token_list
 
     def parse_if_statement(self, token_list):
-        node = CST({"type": "If Statement"})
-        node.children += [CST(token_list.pop(0))]
+        node = Tree({"type": "If Statement"})
+        node.children += [Tree(token_list.pop(0))]
         token_list = node.parse_bool_expr(token_list)
         token_list = node.parse_block(token_list)
         self.children += [node]
         return token_list
 
     def parse_expr(self, token_list):
-        node = CST({"type": "Expression"})
+        node = Tree({"type": "Expression"})
         if token_list[0]["type"] is "Digit":
             token_list = node.parse_int_expr(token_list)
         elif token_list[0]["type"] is "CharList":
@@ -99,34 +107,34 @@ class CST:
         elif token_list[0]["type"] in ["OpenParen", "BoolVal"]:
             token_list = node.parse_bool_expr(token_list)
         elif token_list[0]["type"] is "Id":
-            node.children += [CST(token_list.pop(0))]
+            node.children += [Tree(token_list.pop(0))]
         self.children += [node]
         return token_list
 
     def parse_int_expr(self, token_list):
-        node = CST({"type": "Int Expression"})
-        node.children += [CST(token_list.pop(0))]
+        node = Tree({"type": "Int Expression"})
+        node.children += [Tree(token_list.pop(0))]
         if token_list[0]["type"] is "IntOp":
-            node.children += [CST(token_list.pop(0))]
+            node.children += [Tree(token_list.pop(0))]
             token_list = node.parse_expr(token_list)
         self.children += [node]
         return token_list
 
     def parse_string_expr(self, token_list):
-        node = CST({"type": "String Expression"})
-        node.children += [CST(token_list.pop(0))]
+        node = Tree({"type": "String Expression"})
+        node.children += [Tree(token_list.pop(0))]
         self.children += [node]
         return token_list
 
     def parse_bool_expr(self, token_list):
-        node = CST({"type": "Boolean Expression"})
+        node = Tree({"type": "Boolean Expression"})
         if token_list[0]["type"] is "OpenParen":
-            node.children += [CST(token_list.pop(0))]
+            node.children += [Tree(token_list.pop(0))]
             token_list = node.parse_expr(token_list)
-            node.children += [CST(token_list.pop(0))]
+            node.children += [Tree(token_list.pop(0))]
             token_list = node.parse_expr(token_list)
-            node.children += [CST(token_list.pop(0))]
+            node.children += [Tree(token_list.pop(0))]
         else:
-            node.children += [CST(token_list.pop(0))]
+            node.children += [Tree(token_list.pop(0))]
         self.children += [node]
         return token_list
