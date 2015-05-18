@@ -15,13 +15,19 @@ class Tree:
                 i.print_tree(tabs+1)
 
     def generate_ast(self, cst):
-        for i in cst.children:
-            if i.token["type"] in ["Print Statement", "Assignment Statement", "Variable Declaration", "If Statement", 
-                    "While Statement", "Block", "IdType", "Id", "Digit", "CharList", "BoolOp", "BoolVal"]:
-                self.children += [Tree(i.token)]
-                self.children[-1].generate_ast(i)
+        i = 0
+        while i < len(cst.children):
+            if i < len(cst.children)-2 and cst.children[i+1].token["type"] in ["BoolOp", "IntOp"]:
+                test = [cst.children.pop(i), cst.children.pop(i+1)]
+                cst.children[i].children += test
+                i-=1
+            elif cst.children[i].token["type"] in ["Print Statement", "Assignment Statement", "Variable Declaration", "If Statement", 
+                    "While Statement", "Block", "IdType", "Id", "Digit",  "CharList", "BoolVal", "IntOp", "BoolOp"]:
+                self.children += [Tree(cst.children[i].token)]
+                self.children[-1].generate_ast(cst.children[i])
             else:
-                self.generate_ast(i)
+                self.generate_ast(cst.children[i])
+            i+=1
                 
     def generate_cst(self, token_list):
         token_list = self.parse_block(token_list)
