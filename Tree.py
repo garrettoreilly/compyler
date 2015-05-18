@@ -17,11 +17,10 @@ class Tree:
     def generate_ast(self, cst):
         i = 0
         while i < len(cst.children):
-            if i < len(cst.children)-2 and cst.children[i+1].token["type"] in ["BoolOp", "IntOp"]:
-                test = [cst.children.pop(i), cst.children.pop(i+1)]
-                cst.children[i].children += test
+            if i < len(cst.children)-2 and cst.children[i+1].token["type"] in ["BoolOp", "IntOp", "AssignOp"]:
+                cst.children[i+1].children += [cst.children.pop(i), cst.children.pop(i+1)] 
                 i-=1
-            elif cst.children[i].token["type"] in ["Print Statement", "Assignment Statement", "Variable Declaration", "If Statement", 
+            elif cst.children[i].token["type"] in ["Print Statement", "AssignOp", "Variable Declaration", "If Statement", 
                     "While Statement", "Block", "IdType", "Id", "Digit",  "CharList", "BoolVal", "IntOp", "BoolOp"]:
                 self.children += [Tree(cst.children[i].token)]
                 self.children[-1].generate_ast(cst.children[i])
