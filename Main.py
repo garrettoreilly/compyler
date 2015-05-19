@@ -1,4 +1,4 @@
-import sys, Lexer, Parser, Tree
+import sys, Lexer, Parser, Tree, Semantics
 
 def main():
     f = open(sys.argv[1], 'r')
@@ -12,6 +12,8 @@ def main():
     ast_root = Tree.Tree({"type": "Block"})
     ast_root.generate_ast(cst_root.children[0])
     ast_root.print_tree(1)
+    symbol_table = Semantics.Scope()
+    symbol_table.generate_table(ast_root)
     print("Compilation successful!")
 
 if __name__ == '__main__':
