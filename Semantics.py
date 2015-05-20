@@ -6,12 +6,26 @@ class Scope:
         self.parent = parent
         self.children = []
         self.symbols = []
+        self.types = {
+            "Digit": "int",
+            "CharList": "string",
+            "BoolVal": "boolean"
+        }
+
+    def print_table(self, tabs):
+        indent = "  " * tabs
+        print("%s%i" % (indent, self.scope_id))
+        for a in self.symbols:
+            print(a)
+        for i in self.children:
+            if i.children is not []:
+                i.print_table(tabs+1)
 
     def generate_table(self, ast):
         i = 0
         while i < len(ast.children):
-            if ast.children[i].token["type"] in ["Int, String, Boolean"]:
-                new_symbol = {"type": ast.children[i].token["type"], "name": ast.children[i+1].token["value"]}
+            if ast.children[i].token["type"] in ["Digit, CharList, BoolVal"]:
+                new_symbol = {"type": self.types.get(ast.children[i].token["type"]), "name": ast.children[i+1].token["value"]}
                 if new_symbol["name"] in [x["name"] for x in self.children]:
                     sys.exit("Error! Variable %s already declared in this scope!" % new_symbol["name"])
                 else:
@@ -49,7 +63,26 @@ class Scope:
             return None
 
     def evaluate_expr(self, ast):
-        return None
+        if ast.token["type"] is "Digit":
+            return ("int", ast.token["value"])
+        elif ast.token["type"] is "CharList":
+            return ("string", ast.token["value"])
+        elif ast.token["type"] is "BoolVal":
+            return ("boolean", ast.token["value"])
+        elif ast.token["type"] is "IntOp":
+            int_op_children = []
+            for i in ast.children:
+                int_op_children += self.evaluate_expr(i)
+            if all([x is "int" for x in [y[0] for y in int_op_children]]):
+                return ("int", sum([j[1] for j in int_op_children]))
+        elif ast.token["type"] is "BoolOp":
+            bool_op_children = []
+            for i in ast.children:
+                bool_op_children += self.evalue_expr(i)
+            if bool_op_children[0][1] is bool_op_children[1][1]:
+                return ("boolean", "true")
+            else:
+                return ("boolean", "false")
 
     def calculate_scope_id(self):
         new_id = 0
@@ -58,4 +91,4 @@ class Scope:
         else:
             for i in self.children:
                 new_id += i.calculate_scope_id(i)
-        return new_id
+            return new_id
