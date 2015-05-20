@@ -6,15 +6,10 @@ class Scope:
         self.parent = parent
         self.children = []
         self.symbols = []
-        self.types = {
-            "Digit": "int",
-            "CharList": "string",
-            "BoolVal": "boolean"
-        }
 
     def print_table(self, tabs):
         indent = "  " * tabs
-        print("%s%i" % (indent, self.scope_id))
+        print("%sScope ID: %d" % (indent, self.scope_id))
         for a in self.symbols:
             print(a)
         for i in self.children:
@@ -24,35 +19,46 @@ class Scope:
     def generate_table(self, ast):
         i = 0
         while i < len(ast.children):
-            if ast.children[i].token["type"] in ["Digit, CharList, BoolVal"]:
-                new_symbol = {"type": self.types.get(ast.children[i].token["type"]), "name": ast.children[i+1].token["value"]}
+            if ast.children[i].token["type"] in ["Print Statement", "AssignOp", "Variable Declaration", 
+                    "If Statement", "While Statement", "IntOp", "BoolOp"]:
+                self.generate_table(ast.children[i])
+            elif ast.children[i].token["type"] is "IdType":
+                new_symbol = {"type": ast.children[i].token["value"], "name": ast.children[i+1].token["value"], 
+                        "line": ast.children[i+1].token["line"], "position": ast.children[i+1].token["position"]}
                 if new_symbol["name"] in [x["name"] for x in self.children]:
                     sys.exit("Error! Variable %s already declared in this scope!" % new_symbol["name"])
                 else:
                     self.symbols += [new_symbol]
                 i+=2
             elif ast.children[i].token["type"] is "Id":
-                new_symbol = {"name": ast.children[i].token["value"]}
+                new_symbol = {"name": ast.children[i].token["value"], "line": ast.children[i].token["line"], 
+                        "position": ast.children[i].token["position"]}
                 parent_search = self.check_symbol(new_symbol)
+                print("Line 42:", parent_search.scope_id)
                 if parent_search is None:
-                    sys.exit("Error! Undeclared identifier %s!" % new_symbol["name"])
+                    sys.exit("Error! Undeclared identifier %s!\nLine: %d, Position %d" 
+                            % (new_symbol["name"], new_symbol["line"], new_symbol["position"]))
                 else:
+                    print("Line 42: Line %d, Position %d" % (ast.children[i].token["line"], ast.children[i].token["position"]))
                     (new_symbol["type"], new_symbol["value"]) = self.evaluate_expr(ast.children[i+1])
-                for i in parent_search.symbols:
-                    if i["name"] is new_symbol["name"]:
-                        if i["type"] is new_symbol["type"]:
-                            i["value"] = new_symbol["value"]
+                for x in parent_search.symbols:
+                    if x["name"] is new_symbol["name"]:
+                        if x["type"] is new_symbol["type"]:
+                            x["value"] = new_symbol["value"]
                             break
                         else:
-                            sys.exit("Error! Type mismatch on ID %s!" % new_symbol["name"])
+                            sys.exit("Error! Type mismatch on ID %s!\nLine %d, Position %d" 
+                                    % (new_symbol["name"], new_symbol["line"], new_symbol["position"]))
             elif ast.children[i].token["type"] is "Block":
-                self.create_child_scope().generate_table(ast.children[i])
+                print("Creating new scope...")
+                self.create_child_scope(ast.children[i])
             i+=1
 
-    def create_child_scope(self):
-        new_scope = Scope(self.calculate_scope_id(), self)
+    def create_child_scope(self, ast):
+        new_scope_id = self.scope_id + self.calculate_scope_id()
+        new_scope = Scope(new_scope_id, self)
         self.children += [new_scope]
-        return new_scope
+        new_scope.generate_table(ast)
 
     def check_symbol(self, symbol):
         if symbol["name"] in [x["name"] for x in self.symbols]:
@@ -72,9 +78,9 @@ class Scope:
         elif ast.token["type"] is "IntOp":
             int_op_children = []
             for i in ast.children:
-                int_op_children += self.evaluate_expr(i)
+                int_op_children += [self.evaluate_expr(i)]
             if all([x is "int" for x in [y[0] for y in int_op_children]]):
-                return ("int", sum([j[1] for j in int_op_children]))
+                return ("int", sum([int(j[1]) for j in int_op_children]))
         elif ast.token["type"] is "BoolOp":
             bool_op_children = []
             for i in ast.children:

@@ -8,7 +8,7 @@ def main():
     Parser.parse_program(token_list)
     cst_root = Tree.Tree({"type": "Program"})
     cst_root.generate_cst(token_list)
-    cst_root.print_tree(1)
+    # cst_root.print_tree(1)
     ast_root = Tree.Tree({"type": "Block"})
     ast_root.generate_ast(cst_root.children[0])
     ast_root.print_tree(1)
