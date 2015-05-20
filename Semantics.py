@@ -57,11 +57,9 @@ class Scope:
 
     def create_child_scope(self, ast):
         new_scope_id = self.scope_id + self.calculate_scope_id()
-        print("Line 61:", new_scope_id)
         new_scope = Scope(new_scope_id, self)
         new_scope.generate_table(ast)
         self.children += [new_scope]
-        print(self.children)
 
     def check_symbol(self, symbol):
         if symbol["name"] in [x["name"] for x in self.symbols]:
@@ -79,11 +77,22 @@ class Scope:
         elif ast.token["type"] == "BoolVal":
             return ("boolean", ast.token["value"])
         elif ast.token["type"] == "Id":
-            new_symbol = {"name": ast.token["value"]}
+            new_symbol = {"name": ast.token["value"], "line": ast.token["line"], 
+                    "position": ast.token["position"]}
             id_scope = self.check_symbol(new_symbol)
             for i in id_scope.symbols:
                 if i["name"] == new_symbol["name"]:
-                    return (i["type"], i["value"])
+                    try:
+                        return (i["type"], i["value"])
+                    except:
+                        print("Warning! Use of uninitialized ID %s!\nLine %d, Position %d" 
+                                % (new_symbol["name"], new_symbol["line"], new_symbol["position"]))
+                        if i["type"] == "int":
+                            return ("int", 0)
+                        elif i["type"] == "string":
+                            return ("string", "")
+                        elif i["type"] == "boolean":
+                            return ("boolean", "false")
         elif ast.token["type"] == "IntOp":
             int_op_children = []
             for i in ast.children:
@@ -94,7 +103,6 @@ class Scope:
             bool_op_children = []
             for i in ast.children:
                 bool_op_children += [self.evaluate_expr(i)]
-            print(len(bool_op_children))
             if bool_op_children[0][1] == bool_op_children[1][1]:
                 return ("boolean", "true")
             else:
