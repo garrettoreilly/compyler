@@ -8,13 +8,12 @@ class Scope:
         self.symbols = []
 
     def print_table(self, tabs):
-        indent = "  " * tabs
+        indent = "    " * tabs
         print("%sScope ID: %d" % (indent, self.scope_id))
         for a in self.symbols:
             print(a)
         for i in self.children:
-            if i.children != []:
-                i.print_table(tabs+1)
+            i.print_table(tabs+1)
 
     def generate_table(self, ast):
         i = 0
@@ -58,15 +57,17 @@ class Scope:
 
     def create_child_scope(self, ast):
         new_scope_id = self.scope_id + self.calculate_scope_id()
+        print("Line 61:", new_scope_id)
         new_scope = Scope(new_scope_id, self)
-        self.children += [new_scope]
         new_scope.generate_table(ast)
+        self.children += [new_scope]
+        print(self.children)
 
     def check_symbol(self, symbol):
         if symbol["name"] in [x["name"] for x in self.symbols]:
             return self
         elif self.parent != None:
-            return check_symbol(self.parent, symbol)
+            return self.parent.check_symbol(symbol)
         else:
             return None
 
@@ -77,6 +78,12 @@ class Scope:
             return ("string", ast.token["value"])
         elif ast.token["type"] == "BoolVal":
             return ("boolean", ast.token["value"])
+        elif ast.token["type"] == "Id":
+            new_symbol = {"name": ast.token["value"]}
+            id_scope = self.check_symbol(new_symbol)
+            for i in id_scope.symbols:
+                if i["name"] == new_symbol["name"]:
+                    return (i["type"], i["value"])
         elif ast.token["type"] == "IntOp":
             int_op_children = []
             for i in ast.children:
@@ -87,6 +94,7 @@ class Scope:
             bool_op_children = []
             for i in ast.children:
                 bool_op_children += [self.evaluate_expr(i)]
+            print(len(bool_op_children))
             if bool_op_children[0][1] == bool_op_children[1][1]:
                 return ("boolean", "true")
             else:
@@ -98,5 +106,5 @@ class Scope:
             return 1
         else:
             for i in self.children:
-                new_id += i.calculate_scope_id(i)
+                new_id += i.calculate_scope_id()
             return new_id
