@@ -4,8 +4,8 @@ class Tree:
         self.children = []
 
     def print_tree(self, tabs):
-        parent_indent = "  " * (tabs - 1)
-        child_indent = "  " * tabs
+        parent_indent = "    " * (tabs - 1)
+        child_indent = "    " * tabs
         try:
             print("%s%s, %s" % (parent_indent, self.token["type"], self.token["value"]))
         except:
