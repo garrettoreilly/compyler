@@ -1,4 +1,4 @@
-import sys, lexer, parser
+import sys, Lexer, Parser
 
 def main():
     verbosity = False

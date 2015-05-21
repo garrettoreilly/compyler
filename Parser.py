@@ -1,4 +1,4 @@
-import sys, lexer
+import sys, Lexer
 
 def parse_program(token_list):
     result = parse_block(token_list)
