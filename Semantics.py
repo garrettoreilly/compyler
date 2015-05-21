@@ -1,15 +1,16 @@
 import sys
 
 class Scope:
-    def __init__(self, scope_id = 0, parent = None):
-        self.scope_id = scope_id
+    def __init__(self, ast, parent = None):
+        self.scope_id = 0
         self.parent = parent
         self.children = []
         self.symbols = []
+        self.create_scope(ast)
 
     def print_table(self, tabs):
         indent = "    " * tabs
-        print("%sScope ID: %d" % (indent, self.scope_id))
+        print("\nScope ID: %d" % self.scope_id)
         for a in self.symbols:
             print(a)
         for i in self.children:
@@ -50,16 +51,21 @@ class Scope:
                 valid = self.evaluate_expr(ast.children[i].children[0])
             elif ast.children[i].token["type"] in ["If Statement", "While Statement"]:
                 valid = self.evaluate_expr(ast.children[i].children[0])
-                self.create_child_scope(ast.children[i].children[1])
+                self.children += [Scope(ast.children[i].children[1], self)]
             elif ast.children[i].token["type"] == "Block":
-                self.create_child_scope(ast.children[i])
+                self.children += [Scope(ast.children[i], self)]
             i+=1
 
-    def create_child_scope(self, ast):
-        new_scope_id = self.scope_id + self.calculate_scope_id()
-        new_scope = Scope(new_scope_id, self)
-        new_scope.generate_table(ast)
-        self.children += [new_scope]
+    def create_scope(self, ast):
+        if self.parent != None:
+            self.scope_id = self.parent.scope_id + self.calculate_scope_id()
+        self.generate_table(ast)
+        for i in self.symbols:
+            try:
+                temp = i["value"]
+            except:
+                print("Warning! Declared ID %s is not used!\nLine %d, Position %d" 
+                        % (i["name"], i["line"], i["position"]))
 
     def check_symbol(self, symbol):
         if symbol["name"] in [x["name"] for x in self.symbols]:
@@ -104,15 +110,21 @@ class Scope:
             for i in ast.children:
                 bool_op_children += [self.evaluate_expr(i)]
             if bool_op_children[0][1] == bool_op_children[1][1]:
-                return ("boolean", "true")
+                if ast.token["value"] == "==":
+                    return ("boolean", "true")
+                else:
+                    return ("boolean", "false")
             else:
-                return ("boolean", "false")
+                if ast.token["value"] == "==":
+                    return ("boolean", "false")
+                else:
+                    return ("boolean", "true")
 
     def calculate_scope_id(self):
-        new_id = 0
-        if self.children == []:
-            return 1
+        new_id = 1
+        if len(self.parent.children) == 1:
+            return new_id
         else:
-            for i in self.children:
+            for i in self.parent.children:
                 new_id += i.calculate_scope_id()
             return new_id

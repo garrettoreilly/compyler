@@ -12,8 +12,7 @@ def main():
     ast_root = Tree.Tree({"type": "Block"})
     ast_root.generate_ast(cst_root.children[0])
     ast_root.print_tree(1)
-    symbol_table = Semantics.Scope()
-    symbol_table.generate_table(ast_root)
+    symbol_table = Semantics.Scope(ast_root)
     symbol_table.print_table(0)
     print("Compilation successful!")
 
