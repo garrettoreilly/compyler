@@ -58,7 +58,7 @@ class Scope:
 
     def create_scope(self, ast):
         if self.parent != None:
-            self.scope_id = self.parent.scope_id + self.calculate_scope_id()
+            self.scope_id = self.parent.scope_id + self.parent.calculate_scope_id()
         self.generate_table(ast)
         for i in self.symbols:
             try:
@@ -122,9 +122,9 @@ class Scope:
 
     def calculate_scope_id(self):
         new_id = 1
-        if len(self.parent.children) == 1:
+        if self.children == []:
             return new_id
         else:
-            for i in self.parent.children:
+            for i in self.children:
                 new_id += i.calculate_scope_id()
             return new_id
