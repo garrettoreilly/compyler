@@ -12,7 +12,7 @@ def main():
     token_list = Lexer.lex_program(program)
     if verbosity:
         print("Token list:\n", [x["type"] for x in token_list])
-    Parser.parse_program(token_list)
+    Parser.parse_program(token_list, verbosity)
     cst_root = Tree.Tree({"type": "Program"})
     cst_root.generate_cst(token_list)
     if verbosity:
