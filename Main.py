@@ -9,10 +9,10 @@ def main():
     f = open(args[1], 'r')
     program = f.read()
     f.close()
-    token_list = lexer.lex_program(program)
+    token_list = Lexer.lex_program(program)
     if verbosity:
         print("Token list:\n", [x["type"] for x in token_list])
-    parser.parse_program(token_list)
+    Parser.parse_program(token_list)
     print("Compilation successful!")
 
 if __name__ == '__main__':

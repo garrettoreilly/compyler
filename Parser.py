@@ -1,6 +1,7 @@
 import sys, Lexer
 
 def parse_program(token_list):
+    print("Looking for program...")
     result = parse_block(token_list)
     if result[0]["type"] == "EOF":
         print("Parse successful!")
@@ -9,6 +10,7 @@ def parse_program(token_list):
                 % (result[0]["value"], result[1]["type"], result[1]["line"], result[1]["position"]))
 
 def parse_block(token_list):
+    print("Looking for block...")
     result = get_terminal(token_list, "OpenBrace")
     if result[0]["type"] is "Error":
         return result
@@ -17,6 +19,7 @@ def parse_block(token_list):
     return result
 
 def parse_statement_list(token_list):
+    print("Looking for statement list...")
     if token_list[0]["type"] in ["CloseBrace", "Error"]:
         return token_list
     else:
@@ -27,6 +30,7 @@ def parse_statement_list(token_list):
         return result
 
 def parse_statement(token_list):
+    print("Looking for statement...")
     if token_list[0]["type"] is "Error":
         return token_list
     result_list = [parse_print_statement(token_list), parse_assign_statement(token_list),
@@ -40,6 +44,7 @@ def parse_statement(token_list):
     return [{"type": "Error", "value": "Statement"}] + token_list
 
 def parse_print_statement(token_list):
+    print("Looking for print statement...")
     if token_list[0]["type"] is "Error":
         return result
     result = get_terminal(token_list, "Print")
@@ -51,6 +56,7 @@ def parse_print_statement(token_list):
     return result
 
 def parse_assign_statement(token_list):
+    print("Looking for assignment statement...")
     if token_list[0]["type"] is "Error":
         return token_list
     result = get_terminal(token_list, "Id")
@@ -59,6 +65,7 @@ def parse_assign_statement(token_list):
     return result
 
 def parse_var_decl(token_list):
+    print("Looking for variable declaration...")
     if token_list[0]["type"] is "Error":
         return token_list
     result = get_terminal(token_list, "IdType")
@@ -66,6 +73,7 @@ def parse_var_decl(token_list):
     return result
 
 def parse_while_statement(token_list):
+    print("Looking for while statement...")
     if token_list[0]["type"] is "Error":
         return token_list
     result = get_terminal(token_list, "While")
@@ -76,6 +84,7 @@ def parse_while_statement(token_list):
     return result
 
 def parse_if_statement(token_list):
+    print("Looking for if statement...")
     if token_list[0]["type"] is "Error":
         return token_list
     result = get_terminal(token_list, "If")
@@ -86,6 +95,7 @@ def parse_if_statement(token_list):
     return result
 
 def parse_expr(token_list):
+    print("Looking for expression...")
     if token_list[0]["type"] is "Error":
         return token_list
     result_list = [parse_int_expr(token_list), parse_string_expr(token_list),
@@ -98,6 +108,7 @@ def parse_expr(token_list):
     return [{"type": "Error", "value": "Expression"}] + token_list
 
 def parse_int_expr(token_list):
+    print("Looking for integer expression...")
     if token_list[0]["type"] is "Error":
         return token_list
     result = get_terminal(token_list, "Digit")
@@ -111,6 +122,7 @@ def parse_int_expr(token_list):
     return result
 
 def parse_string_expr(token_list):
+    print("Looking for string expression...")
     if token_list[0]["type"] is "Error":
         return token_list
     elif token_list[0]["type"] is not "CharList":
@@ -120,6 +132,7 @@ def parse_string_expr(token_list):
         return result
 
 def parse_bool_expr(token_list):
+    print("Looking for boolean expression...")
     if token_list[0]["type"] is "Error":
         return token_list
     result = get_terminal(token_list, "OpenParen")
@@ -135,6 +148,7 @@ def parse_bool_expr(token_list):
 
 def get_terminal(token_list, terminal_type):
     if token_list[0]["type"] is terminal_type:
+        print("Found", terminal_type, "!\n")
         return token_list[1:]
     elif token_list[0]["type"] is "Error":
         return token_list
