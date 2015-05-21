@@ -12,7 +12,7 @@ class Scope:
         indent = "    " * tabs
         print("\nScope ID: %d" % self.scope_id)
         for a in self.symbols:
-            print(a)
+            print(a["type"], a["name"])
         for i in self.children:
             i.print_table(tabs+1)
 
