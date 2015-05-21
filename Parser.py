@@ -2,9 +2,7 @@ import sys, Lexer
 
 def parse_program(token_list):
     result = parse_block(token_list)
-    if result[0]["type"] == "EOF":
-        print("Parse successful!")
-    else:
+    if result[0]["type"] != "EOF":
         sys.exit("Error! Expected %s, received %s\nLine %d, position %d" 
                 % (result[0]["value"], result[1]["type"], result[1]["line"], result[1]["position"]))
 
