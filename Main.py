@@ -12,7 +12,7 @@ def main():
     token_list = Lexer.lex_program(program)
     if verbosity:
         print("Token list:\n", [x["type"] for x in token_list])
-    Parser.parse_program(token_list)
+    Parser.parse_program(token_list, verbosity)
     print("Compilation successful!")
 
 if __name__ == '__main__':
