@@ -1,4 +1,4 @@
-import sys, Lexer, Parser, Tree, Semantics
+import sys, Lexer, Parser, Tree, Semantics, CodeGen
 
 def main():
     verbosity = False
@@ -28,6 +28,7 @@ def main():
     symbol_table = Semantics.Scope(ast_root)
     if verbosity:
         symbol_table.print_table(0)
+    code = CodeGen.ExecEnv(ast_root, symbol_table)
     print("\nCompilation successful!")
 
 if __name__ == '__main__':
