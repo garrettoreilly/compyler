@@ -37,9 +37,10 @@ def parse_statement(token_list, verbosity):
         print("Looking for statement...")
     if token_list[0]["type"] is "Error":
         return token_list
-    result_list = [parse_print_statement(token_list, verbosity), parse_assign_statement(token_list, verbosity),
-            parse_var_decl(token_list, verbosity), parse_while_statement(token_list, verbosity),
-            parse_if_statement(token_list, verbosity), parse_block(token_list, verbosity)]
+    result_list = [parse_print_statement(token_list, verbosity), 
+            parse_assign_statement(token_list, verbosity), parse_var_decl(token_list, verbosity), 
+            parse_while_statement(token_list, verbosity), parse_if_statement(token_list, verbosity), 
+            parse_block(token_list, verbosity)]
 
     for result in result_list:
         if result[0]["type"] is not "Error":
